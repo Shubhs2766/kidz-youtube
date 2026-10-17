@@ -1,0 +1,13 @@
+services:
+  kidtube:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./config.yaml:/app/config.yaml
+      - ./scripts:/app/scripts
+      - ./output:/app/output
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./secrets:/app/secrets
+      - ./assets:/app/assets

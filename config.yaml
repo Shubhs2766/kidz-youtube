@@ -1,0 +1,103 @@
+# ======================================================================
+#  KidTube configuration.  Secrets live in .env, everything else here.
+# ======================================================================
+
+schedule:
+  time: "09:00"              # daily run time, 24h HH:MM
+  timezone: "Asia/Kolkata"   # IANA timezone name
+  watchdog_minutes: 180      # alert if today's run isn't finished this long after the run time
+  weekly_report_day: "sun"   # mon..sun
+  weekly_report_time: "18:00"
+
+paths:
+  scripts_dir: "scripts"          # put YYYY-MM-DD.txt files here (e.g. 2026-09-29.txt)
+  backlog_dir: "scripts/backlog"  # fallback scripts used if today's file is missing
+  output_dir: "output"
+  logs_dir: "logs"
+  db_file: "data/kidtube.db"
+  music_library_dir: "assets/music"   # only used when music.provider = "file"
+
+llm:
+  model: "gemini-3.5-flash-lite"
+  max_tokens: 6000
+  estimated_cost_per_call_usd: 0.10
+
+content:
+  audience: "preschool children aged 2-5"   # shapes tone and pacing in the storyboard
+  language: "English"
+  target_seconds: 60
+  max_scene_seconds: 8
+  style_guide: >
+    Premium children's 3D animated nursery video, bright saturated colors, rounded toy-like shapes,
+    soft lighting, large expressive eyes, smooth animation, clean backgrounds, 16:9.
+  negative_rules: "no text, no logos, no watermarks, no scary elements, no violence, no copyrighted characters"
+  description_footer: "Made with AI-generated visuals. Original music and characters."
+
+video:
+  provider: "gemini"          # "gemini" for Veo; "mock" for offline tests
+  mode: "text_to_video"       # "text_to_video" or "image_to_video" (uses a generated keyframe per scene)
+  aspect_ratio: "16:9"
+  resolution: "720p"          # Veo Lite cost tier; FFmpeg upscales final output to 1080p
+  model: "veo-3.1-lite-generate-preview"
+  allowed_durations: [8]      # Veo 3.1 Lite returns 8-second clips
+  generate_audio: true
+  use_native_audio: true
+  native_audio_volume: 0.25
+  cost_per_second_usd: 0.05   # Veo 3.1 Lite 720p list price; confirm current regional/account pricing
+  max_parallel: 2
+  poll_seconds: 10
+  timeout_seconds: 900
+  max_attempts: 1             # one QA regeneration is budgeted separately
+
+image:
+  provider: "gemini"          # used only in image_to_video mode; output is billed
+  model: "gemini-3.1-flash-lite-image"
+  aspect_ratio: "16:9"
+  image_size: "1K"
+  cost_per_image_usd: 0.0336
+
+voice:
+  provider: "gemini"
+  voice_id: "Kore"
+  model_id: "gemini-3.8-flash-lite-tts"
+  cost_per_second_usd: 0.00015
+  volume: 1.0
+
+music:
+  provider: "gemini"          # "gemini", "file" (licensed), or "none"
+  model_id: "lyria-3.5"
+  cost_per_generation_usd: 0.08
+  volume: 0.22
+  prompt_suffix: "instrumental only, cheerful original preschool music, simple memorable rhythm, no vocals, not resembling any existing song or melody"
+
+assemble:
+  width: 1920
+  height: 1080
+  fps: 30
+  intro_file: ""              # optional mp4 prepended to every video
+  outro_file: ""              # optional mp4 appended to every video
+
+qa:
+  enabled: true
+  frames_per_scene: 2
+  on_fail: "hold"             # "hold" = don't upload, alert you.  "upload_private" = upload as private anyway
+  regenerate_failed_scenes: true
+
+youtube:
+  channel_id: "UCTBe_wrceNLF9lhTYqfzs7A"              # optional: UC... id; the script warns if the authorized channel differs
+  client_secret_file: "secrets/client_secret.json"   # OAuth desktop client downloaded from Google Cloud
+  token_file: "secrets/token.json"
+  made_for_kids: true         # sent as selfDeclaredMadeForKids on every upload
+  contains_synthetic_media: true
+  category_id: "1"            # 1 = Film & Animation, 27 = Education
+  publish_mode: "approval"    # "auto" | "approval" (upload private, you publish) | "scheduled" (private + publishAt)
+  publish_at_time: "16:00"    # used by "scheduled" mode, in schedule.timezone
+  default_language: "en"
+
+limits:
+  max_daily_cost_usd: 15.0    # preflight includes retries and one full QA regeneration
+
+alerts:
+  telegram: false
+  email: true
+  min_level: "info"           # sends success emails as well as failures

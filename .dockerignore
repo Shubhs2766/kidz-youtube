@@ -1,0 +1,16 @@
+.env
+.git
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+tests
+scripts/*.txt
+scripts/backlog/*.txt
+scripts/backlog/used
+output
+data
+logs
+secrets/*
+!secrets/.gitkeep
+assets/music/*

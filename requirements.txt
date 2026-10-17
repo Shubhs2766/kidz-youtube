@@ -1,0 +1,11 @@
+google-genai>=2.25.0
+requests>=2.31
+pydantic>=2.5
+PyYAML>=6.0
+python-dotenv>=1.0
+APScheduler>=3.10,<4
+tzdata>=2024.1
+google-api-python-client>=2.120
+google-auth-oauthlib>=1.2
+google-auth-httplib2>=0.2
+pytest>=8.0
